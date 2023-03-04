@@ -30,7 +30,7 @@ export default async function (req, res) {
       model: "text-davinci-003",
       prompt: generatePrompt(userInput),
       temperature: 0.6,
-      max_tokens: 4000,
+      max_tokens: 4097,
     });
     res.status(200).json({ result: completion.data.choices[0].text, info: completion.data.usage });
 //    res.status(200).json({ info: completion.data.usage.total_tokens });
