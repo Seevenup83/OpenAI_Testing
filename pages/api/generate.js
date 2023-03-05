@@ -1,12 +1,13 @@
 import { Configuration, OpenAIApi } from "openai";
 
-const configuration = new Configuration({
+const openaiConfig = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
+
+const openai = new OpenAIApi(openaiConfig);
 
 export default async function (req, res) {
-  if (!configuration.apiKey) {
+  if (!openaiConfig.apiKey) {
     res.status(500).json({
       error: {
         message: "OpenAI API key not configured, please follow instructions in README.md",
@@ -26,14 +27,30 @@ export default async function (req, res) {
   }
 
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: generatePrompt(userInput),
+    // Chat - API call
+    const chatCompletionResult = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {"role": "system", "content": "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."},
+        {"role": "user", "content": generatePrompt(userInput)},
+      ],
       temperature: 0.6,
-      max_tokens: 4097,
+      max_tokens: 4000,
     });
-    res.status(200).json({ result: completion.data.choices[0].text, info: completion.data.usage });
-//    res.status(200).json({ info: completion.data.usage.total_tokens });
+
+    // Images - API call
+    const imageResult = await openai.createImage({
+      prompt: "An expressive oil painting, depicted as an explosion of a nebula, " + chatCompletionResult.data.choices[0].message.content,
+
+      n: 3,
+      size: "256x256",
+    });
+
+    const { content } = chatCompletionResult.data.choices[0].message;
+    const { usage } = chatCompletionResult.data;
+    const { data } = imageResult.data;
+    res.status(200).json({ result: content, info: usage, image: data.map(({ url }) => url)});
+
   } catch(error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
