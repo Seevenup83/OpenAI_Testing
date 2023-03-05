@@ -11,7 +11,7 @@ This is an example OpenAPI integration based of the [OpenAI API quickstart tutor
 3. Navigate into the project directory
 
    ```bash
-   $ cd openai-quickstart-node
+   $ cd openAI
    ```
 
 4. Install the requirements
